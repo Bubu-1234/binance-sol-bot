@@ -1,14 +1,13 @@
 import ccxt
 import time
+import os
 
-# === YOUR REAL KEYS (keep these safe!) ===
 exchange = ccxt.binance({
-    'apiKey': 'GSLsR8fTMcr4mGNJXzDySqHQBNIhljuVLjmZCGPp8Ehrd1jvyRdsmTsaeG56XjiS',
-    'secret': 'uJQLBtlCJ4Wftfvc4ixhOMZh7eMoillAEhyesey1eAPcEucKAwbtAVku1puAgNbi',
+    'apiKey': os.getenv('API_KEY'),
+    'secret': os.getenv('API_SECRET'),
     'enableRateLimit': True,
     'options': {'defaultType': 'spot'}
 })
-
 symbol = 'SOL/USDT'      # we only trade SOL
 trade_usdt = 6                  # $6 per trade (safe for your balance)
 
@@ -44,4 +43,5 @@ while True:
 
     except Exception as e:
         print("Small error (normal):", e)
+
         time.sleep(60)
