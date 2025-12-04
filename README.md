@@ -1,0 +1,2 @@
+# binance-sol-bot
+anything
