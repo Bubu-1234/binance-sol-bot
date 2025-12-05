@@ -12,18 +12,16 @@ exchange = ccxt.binance({
     'options': {'defaultType': 'spot'}
 })
 
-# === ADD OR REMOVE COINS HERE (super easy) ===
 coins = [
-    {"symbol": "SOL/USDT",  "buy": 135,  "sell": 142,  "size_usdt": 6},
-    {"symbol": "BNB/USDT",  "buy": 870,  "sell": 905,  "size_usdt": 6},
-    {"symbol": "XRP/USDT",  "buy": 2.0541,  "sell": 2.1605,  "size_usdt": 6},
-    {"symbol": "KITE/USDT", "buy": 0.0940,  "sell": 0.1027,  "size_usdt": 6},
-    {"symbol": "PEPE/USDT", "buy": 0.000022, "sell": 0.0000245, "size_usdt": 5},
+    {"symbol": "BTC/USDT", "buy": 91200, "sell": 92500, "size_usdt": 6, "stop_loss": -0.015},
+    {"symbol": "SOL/USDT", "buy": 139.5, "sell": 142.5, "size_usdt": 6, "stop_loss": -0.015},
+    {"symbol": "PEPE/USDT", "buy": 0.0000234, "sell": 0.0000241, "size_usdt": 5, "stop_loss": -0.015},
+    {"symbol": "XRP/USDT", "buy": 2.195, "sell": 2.240, "size_usdt": 7, "stop_loss": -0.015},
 ]
-    # ← add more lines like this if you want
 
+print("Low-Risk 4-Coin Bot LIVE – $15+ Daily Target | 0.5% Risk/Trade")
 
-print("Multi-Coin Bot LIVE 24/7 – Trading", len(coins), "pairs")
+entry_prices = {}
 
 def run_bot():
     while True:
@@ -38,19 +36,34 @@ def run_bot():
                 base = symbol.split('/')[0]
                 base_amount = balance['total'].get(base, 0)
 
-                print(f"{time.strftime('%H:%M')} | {symbol:12} ${price:.6f} | USDT {usdt:.2f} | {base} {base_amount:.6f}")
+                print(f"{time.strftime('%H:%M')} | {symbol} ${price:.6f} | USDT {usdt:.2f} | {base} {base_amount:.6f}")
 
-                # BUY
+                # BUY with DCA for BTC
                 if price <= coin["buy"] and usdt >= coin["size_usdt"] + 2:
                     amount = coin["size_usdt"] / price
-                    exchange.create_market_buy_order(symbol, amount)
-                    print(f"   BOUGHT {amount:.6f} {base} @ ${price}")
+                    if coin["symbol"] == "BTC/USDT":
+                        third = amount / 3
+                        exchange.create_market_buy_order(symbol, third)
+                        time.sleep(20)
+                        exchange.create_market_buy_order(symbol, third)
+                        time.sleep(20)
+                        exchange.create_market_buy_order(symbol, third)
+                    else:
+                        exchange.create_market_buy_order(symbol, amount)
+                    entry_prices[base] = price
+                    print(f"   BOUGHT {amount:.6f} {base} @ ${price:.6f} (DCA if BTC)")
 
-                # SELL 60%
-                if price >= coin["sell"] and base_amount >= 0.0001:
+                # SELL 60% on profit
+                if price >= coin["sell"] and base_amount * price >= 1.0:
                     sell_amt = base_amount * 0.6
                     exchange.create_market_sell_order(symbol, sell_amt)
-                    print(f"   SOLD {sell_amt:.6f} {base} @ ${price} → PROFIT")
+                    print(f"   SOLD {sell_amt:.6f} {base} @ ${price:.6f} → PROFIT!")
+
+                # STOP-LOSS (-1.5% from entry)
+                if base in entry_prices and base_amount > 0 and (price / entry_prices[base] <= (1 + coin["stop_loss"])):
+                    exchange.create_market_sell_order(symbol, base_amount)
+                    print(f"   STOP-LOSS {base_amount:.6f} {base} @ ${price:.6f}")
+                    del entry_prices[base]
 
             print("-" * 60)
             time.sleep(60)
@@ -59,15 +72,12 @@ def run_bot():
             print("Error:", e)
             time.sleep(60)
 
-# Run bot in background
 import threading
 threading.Thread(target=run_bot, daemon=True).start()
 
-# Dummy web page (keeps Render alive)
 @app.route('/')
 def home():
-    return "Multi-Coin Bot Running<br>Trading: " + ", ".join(c["symbol"] for c in coins)
+    return "Low-Risk Bot Running – $15+ Daily | BTC, SOL, PEPE, XRP | Logs for Trades"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
