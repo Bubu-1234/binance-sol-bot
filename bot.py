@@ -14,11 +14,14 @@ exchange = ccxt.binance({
 
 # === ADD OR REMOVE COINS HERE (super easy) ===
 coins = [
-    {"symbol": "SOL/USDT",  "buy": 138,  "sell": 143,  "size_usdt": 6},
-    {"symbol": "BNB/USDT",  "buy": 605,  "sell": 618,  "size_usdt": 6},
+    {"symbol": "SOL/USDT",  "buy": 135,  "sell": 142,  "size_usdt": 6},
+    {"symbol": "BNB/USDT",  "buy": 870,  "sell": 905,  "size_usdt": 6},
+    {"symbol": "XRP/USDT",  "buy": 2.0541,  "sell": 2.1605,  "size_usdt": 6},
+    {"symbol": "KITE/USDT", "buy": 0.0940,  "sell": 0.1027,  "size_usdt": 6},
     {"symbol": "PEPE/USDT", "buy": 0.000022, "sell": 0.0000245, "size_usdt": 5},
-    # ← add more lines like this if you want
 ]
+    # ← add more lines like this if you want
+
 
 print("Multi-Coin Bot LIVE 24/7 – Trading", len(coins), "pairs")
 
@@ -67,3 +70,4 @@ def home():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
